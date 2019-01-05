@@ -5,7 +5,13 @@ void Integer::init() {
     cap = 1;
     pos = true;
     ptr = new unsigned long long[1];
+    *ptr = 0;
  }
+
+bool Integer::isZero() {
+    if (length == 1 && *ptr == 0) return true;
+    else return false;
+}
 
 void Integer::alloc(int n) {
     if (length + n > cap) {
@@ -13,7 +19,7 @@ void Integer::alloc(int n) {
         unsigned long long* next_ptr = new unsigned long long[cap];
         length += n;
 
-        for (int i = 0; i < length; ++i) {
+        for (unsigned int i = 0; i < length; ++i) {
             next_ptr[i] = this->ptr[i];
         }
 
@@ -73,6 +79,122 @@ Integer::Integer(long long initial_value) {
     else *ptr = initial_value;
 }
 
+Integer::Integer(const char*) {
+
+}
+
 Integer::~Integer() {
     delete[] ptr;
+}
+
+bool Integer::operator==(Integer& A) {
+    if (this->pos != A.pos) {
+        if (this->isZero() && A.isZero()) return true;
+        else return false;
+    }
+    else {
+        if (this->length == A.length) {
+            for (unsigned int i = 0; i < this->length; ++i) {
+                if (this->ptr[i] != A.ptr[i]) return false;
+            }
+            return true;
+        }
+        else return false;
+    }
+}
+
+bool Integer::operator<=(Integer& A) {
+    if (this->pos) {
+        if (A.pos) {
+            if (this->length == A.length) {
+                for (unsigned int i = this->length - 1; ; --i) {
+                    if (this->ptr[i] != A.ptr[i]) return this->ptr[i] < A.ptr[i];
+                    if (i == 0) return true;
+                }
+                return true;
+            }
+            else return this->length < A.length;
+        }
+        else {
+            if (this->isZero() && A.isZero()) return true;
+            else return false;
+        }
+    }
+    else {
+        if (A.pos) return true;
+        else {
+            if (this->length == A.length) {
+                for (unsigned int i = this->length - 1; ; --i) {
+                    if (this->ptr[i] != A.ptr[i]) return this->ptr[i] > A.ptr[i];
+                    if (i == 0) return true;
+                }
+                return true;
+            }
+            else return this->length > A.length;
+        }
+    }
+}
+
+bool Integer::operator>=(Integer& A) {
+    if (this->pos) {
+        if (A.pos) {
+            if (this->length == A.length) {
+                for (unsigned int i = this->length - 1; ; --i) {
+                    if (this->ptr[i] != A.ptr[i]) return this->ptr[i] > A.ptr[i];
+                    if (i == 0) return true;
+                }
+            }
+            else return this->length > A.length;
+        }
+        else return true;
+    }
+    else {
+        if (A.pos) {
+            if (this->isZero() && A.isZero()) return true;
+            else return false;
+        }
+        else {
+            if (this->length == A.length) {
+                for (unsigned int i = this->length - 1; ; --i) {
+                    if (this->ptr[i] != A.ptr[i]) return this->ptr[i] < A.ptr[i];
+                    if (i == 0) return true;
+                }
+                return true;
+            }
+            else return this->length < A.length;
+        }
+    }
+}
+
+Integer Integer::operator+(Integer& A) {
+    if (this->pos == A.pos) {
+        Integer ret;
+        ret.pos = this->pos;
+
+        unsigned int up, down;
+        up = this->length > A.length ? this->length : A.length;
+        down = this->length < A.length ? this->length : A.length;
+        
+        ret.alloc(up);
+        
+        bool carry = false;
+        for (unsigned int i = 0; i < down; ++i) {
+            ret.ptr[i] = this->ptr[i] + A.ptr[i];
+            if (carry) {
+                if (ret.ptr[i] < this->ptr[i]) {
+                    ret.ptr[i]++;
+                }
+                else {
+                    ret.ptr[i]++;
+                    if (ret.ptr[i]) carry = false;
+                }
+            }
+            else {
+                if (ret.ptr[i] < this->ptr[i]) carry = true;
+            }
+        }
+    }
+    else {
+        //return operator-(Integer& A);
+    }
 }
